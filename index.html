@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interview Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+            background-color: #f0f0f0;
+        }
+
+        h1, h2 {
+            color: #333333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+            margin-top: 20px;
+        }
+
+        label {
+            margin-top: 10px;
+            color: #333333;
+        }
+
+        input[type="text"],
+input[type="email"],
+input[type="datetime-local"] {
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+}
+
+button {
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-color: #f9f9f9;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.cancelButton {
+    padding: 5px 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: none;
+    background-color: #dc3545;
+    color: white;
+    cursor: pointer;
+}
+
+.cancelButton:hover {
+    background-color: #c82333;
+}
+
+        
+    </style>
+</head>
+<body>
+    <h1>Interview Booking</h1>
+    <form id="bookingForm">
+        <label for="userName">Name:</label>
+        <input type="text" id="userName" name="userName" required>
+        
+        <label for="userEmail">Email:</label>
+        <input type="email" id="userEmail" name="userEmail" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required>
+        
+        <label for="interviewDateTime">Date and Time:</label>
+        <input type="datetime-local" id="interviewDateTime" name="interviewDateTime" required min="2023-01-01T00:00">
+        <button type="button" id="setDateTimeButton">Set</button>
+        
+        <button type="button" id="bookInterviewButton">Book Interview</button>
+       
+    </form>
+
+    <h2>Interview Booking List</h2>
+    <ul id="interviewList">
+        
+    </ul>
+
+    <script>
+         document.addEventListener("DOMContentLoaded", function() {
+            const bookingForm = document.getElementById("bookingForm");
+            const interviewList = document.getElementById("interviewList");
+            
+            
+            const storedInterviews = JSON.parse(localStorage.getItem("interviews")) || [];
+            renderInterviews(storedInterviews);
+            
+            bookingForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+            });
+            
+            const bookInterviewButton = document.getElementById("bookInterviewButton");
+            bookInterviewButton.addEventListener("click", function() {
+                const name = document.getElementById("userName").value;
+                const email = document.getElementById("userEmail").value;
+                const time = document.getElementById("interviewDateTime").value;
+                
+                const interviewItem = {
+                    name,
+                    email,
+                    time,
+                };
+                
+                storedInterviews.push(interviewItem);
+                localStorage.setItem("interviews", JSON.stringify(storedInterviews));
+                
+                renderInterviews(storedInterviews);
+                
+                document.getElementById("userName").value = "";
+                document.getElementById("userEmail").value = "";
+                document.getElementById("interviewDateTime").value = "";
+            });
+
+            const setDateTimeButton = document.getElementById("setDateTimeButton");
+
+            setDateTimeButton.addEventListener("click", function () {
+                const dateTimeInput = document.getElementById("interviewDateTime");
+                const selectedDateTime = dateTimeInput.value;
+                if (selectedDateTime) {
+                    document.getElementById("interviewDateTime").value = selectedDateTime;
+                }
+            });
+            
+           
+            function renderInterviews(interviews) {
+                interviewList.innerHTML = "";
+                interviews.forEach(function(interviewItem, index) {
+                    const listItem = document.createElement("li");
+                    listItem.innerHTML = `
+                        <span><strong>Name:</strong> ${interviewItem.name}</span>
+                        <span><strong>Email:</strong> ${interviewItem.email}</span>
+                        <span><strong>Date and Time:</strong> ${new Date(interviewItem.time).toLocaleString()}</span>
+                        <button class="cancelButton" data-index="${index}">Cancel</button>
+                    `;
+                    interviewList.appendChild(listItem);
+                });
+                
+               
+                const cancelButtons = document.querySelectorAll(".cancelButton");
+                cancelButtons.forEach(function(button) {
+                    button.addEventListener("click", function() {
+                        const index = button.getAttribute("data-index");
+                        storedInterviews.splice(index, 1);
+                        localStorage.setItem("interviews", JSON.stringify(storedInterviews));
+                        renderInterviews(storedInterviews);
+                    });
+                });
+            }
+        });
+        
+    </script>
+</body>
+</html>
